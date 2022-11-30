@@ -20,7 +20,9 @@ def gabor_kernel(frequency,  sigma_x, sigma_y, theta=0, offset=0, ks=61):
 
 def sample_dist(hist, bins, ns, scale='linear'):
     rand_sample = np.random.rand(ns)
+    print("***check*****")
     if scale == 'linear':
+        print(np.hstack(([0], hist.cumsum())))
         rand_sample = np.interp(rand_sample, np.hstack(([0], hist.cumsum())), bins)
     elif scale == 'log2':
         rand_sample = np.interp(rand_sample, np.hstack(([0], hist.cumsum())), np.log2(bins))

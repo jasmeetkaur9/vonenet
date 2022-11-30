@@ -1,7 +1,6 @@
-
 from collections import OrderedDict
 from torch import nn
-from .modules import VOneBlock
+from .modules_new import VOneBlock
 from .back_ends import ResNetBackEnd, Bottleneck, AlexNetBackEnd, CORnetSBackEnd
 from .params import generate_gabor_param
 import numpy as np
@@ -12,16 +11,16 @@ def VOneNet(sf_corr=0.75, sf_max=9, sf_min=0, rand_param=False, gabor_seed=0,
             noise_mode='neuronal', noise_scale=0.35, noise_level=0.07, k_exc=25,
             model_arch='resnet50', image_size=224, visual_degrees=8, ksize=25, stride=4):
 
-
     out_channels = simple_channels + complex_channels
+    out_channels = 128
 
-    sf, theta, phase, nx, ny = generate_gabor_param(out_channels, gabor_seed, rand_param, sf_corr, sf_max, sf_min)
+    sf, theta0, theta1, theta2, theta3, phase, nx, ny = generate_gabor_param(out_channels, gabor_seed, rand_param,
+                                                                             sf_corr, sf_max, sf_min)
 
     gabor_params = {'simple_channels': simple_channels, 'complex_channels': complex_channels, 'rand_param': rand_param,
                     'gabor_seed': gabor_seed, 'sf_max': sf_max, 'sf_corr': sf_corr, 'sf': sf.copy(),
-                    'theta': theta.copy(), 'phase': phase.copy(), 'nx': nx.copy(), 'ny': ny.copy()}
+                    'theta0': theta0.copy(),'theta1': theta1.copy(),'theta2': theta2.copy(),'theta3': theta3.copy(), 'phase': phase.copy(), 'nx': nx.copy(), 'ny': ny.copy()}
     arch_params = {'k_exc': k_exc, 'arch': model_arch, 'ksize': ksize, 'stride': stride}
-
 
     # Conversions
     ppd = image_size / visual_degrees
@@ -29,10 +28,14 @@ def VOneNet(sf_corr=0.75, sf_max=9, sf_min=0, rand_param=False, gabor_seed=0,
     sf = sf / ppd
     sigx = nx / sf
     sigy = ny / sf
-    theta = theta/180 * np.pi
+    theta0 = theta0 / 180 * np.pi
+    theta1 = theta1 / 180 * np.pi
+    theta2 = theta2 / 180 * np.pi
+    theta3 = theta3 / 180 * np.pi
+
     phase = phase / 180 * np.pi
 
-    vone_block = VOneBlock(sf=sf, theta=theta, sigx=sigx, sigy=sigy, phase=phase,
+    vone_block = VOneBlock(sf=sf, theta0=theta0, theta1=theta1, theta2=theta2, theta3=theta3,sigx=sigx, sigy=sigy, phase=phase,
                            k_exc=k_exc, noise_mode=noise_mode, noise_scale=noise_scale, noise_level=noise_level,
                            simple_channels=simple_channels, complex_channels=complex_channels,
                            ksize=ksize, stride=stride, input_size=image_size)
