@@ -70,7 +70,6 @@ class VOneBlock(nn.Module):
         self.simple_conv_q21 = GFB(self.in_channels, self.out_channels, ksize, stride)
         self.simple_conv_q30 = GFB(self.in_channels, self.out_channels, ksize, stride)
         self.simple_conv_q31 = GFB(self.in_channels, self.out_channels, ksize, stride)
-        print("*******************")
 
         self.simple_conv_q00.initialize(sf=self.sf, theta=self.theta0, sigx=self.sigx, sigy=self.sigy,
                                         phase=self.phase)
@@ -100,6 +99,7 @@ class VOneBlock(nn.Module):
     def forward(self, x):
         # Gabor activations [Batch, out_channels, H/stride, W/stride]
         x = self.gabors_f(x)
+
         # Noise [Batch, out_channels, H/stride, W/stride]
         x = self.noise_f(x)
         # V1 Block output: (Batch, out_channels, H/stride, W/stride)
@@ -125,10 +125,16 @@ class VOneBlock(nn.Module):
                                      s_q5[:, self.simple_channels:, :, :] ** 2) / np.sqrt(2))
         s2 = self.simple(s_q4[:, 0:self.simple_channels, :, :])
         c3 = self.complex(torch.sqrt(s_q6[:, self.simple_channels:, :, :] ** 2 +
-                                     s_q7[:, self.simple_channels:, :, :] ** 2) / np.sqrt(2))
+                                     s_q7[:, self.simple_channels:, :, :] ** 2) / np.sqrt(2))                                                                                                                                                                                  
         s3 = self.simple(s_q6[:, 0:self.simple_channels, :, :])
-
-        return self.gabors(self.k_exc * torch.cat((s0, c0, s1, c1, s2, c2, s3, c3), 1))
+        layer1 = (self.k_exc * torch.cat((s0, c0),1))
+        layer2 = (self.k_exc * torch.cat((s1, c1),1))
+        layer3 = (self.k_exc * torch.cat((s2, c2),1))
+        layer4 = (self.k_exc * torch.cat((s3, c3),1))
+        layer_max =  torch.max(torch.tensor(layer3),torch.tensor(layer4))
+        layer_max = torch.max(layer_max,torch.tensor(layer2))
+        layer_max = torch.max(layer_max,torch.tensor(layer1))
+        return self.gabors(layer_max)
 
     def noise_f(self, x):
         if self.noise_mode == 'neuronal':

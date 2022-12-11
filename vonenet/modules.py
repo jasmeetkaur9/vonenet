@@ -75,11 +75,13 @@ class VOneBlock(nn.Module):
 
     def forward(self, x):
         # Gabor activations [Batch, out_channels, H/stride, W/stride]
+        print("Input shape from VONE BLOCK is",x.shape)
         x = self.gabors_f(x)
         # Noise [Batch, out_channels, H/stride, W/stride]
         x = self.noise_f(x)
         # V1 Block output: (Batch, out_channels, H/stride, W/stride)
         x = self.output(x)
+        print("Output shape from VONE BLOCK is",x.shape)
         return x
 
     def gabors_f(self, x):

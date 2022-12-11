@@ -1,19 +1,19 @@
 from collections import OrderedDict
 from torch import nn
 from .modules_new import VOneBlock
-from .back_ends import ResNetBackEnd, Bottleneck, AlexNetBackEnd, CORnetSBackEnd
+from .back_ends import ResNetBackEnd, Bottleneck, AlexNetBackEnd, CORnetSBackEnd, SimpleBackEnd
 from .params import generate_gabor_param
 import numpy as np
 
 
-def VOneNet(sf_corr=0.75, sf_max=9, sf_min=0, rand_param=False, gabor_seed=0,
+def VOneNet(sf_corr=0.75, sf_max=9, sf_min=0, rand_param=True, gabor_seed=0,
             simple_channels=256, complex_channels=256,
             noise_mode='neuronal', noise_scale=0.35, noise_level=0.07, k_exc=25,
             model_arch='resnet50', image_size=224, visual_degrees=8, ksize=25, stride=4):
 
     out_channels = simple_channels + complex_channels
     out_channels = 128
-
+    rand_flag = True
     sf, theta0, theta1, theta2, theta3, phase, nx, ny = generate_gabor_param(out_channels, gabor_seed, rand_param,
                                                                              sf_corr, sf_max, sf_min)
 
@@ -41,7 +41,7 @@ def VOneNet(sf_corr=0.75, sf_max=9, sf_min=0, rand_param=False, gabor_seed=0,
                            ksize=ksize, stride=stride, input_size=image_size)
 
     if model_arch:
-        bottleneck = nn.Conv2d(out_channels, 64, kernel_size=1, stride=1, bias=False)
+        bottleneck = nn.Conv2d(128, 64, kernel_size=1, stride=1, bias=False)   
         nn.init.kaiming_normal_(bottleneck.weight, mode='fan_out', nonlinearity='relu')
 
         if model_arch.lower() == 'resnet50':
@@ -50,6 +50,9 @@ def VOneNet(sf_corr=0.75, sf_max=9, sf_min=0, rand_param=False, gabor_seed=0,
         elif model_arch.lower() == 'alexnet':
             print('Model: ', 'VOneAlexNet')
             model_back_end = AlexNetBackEnd()
+        elif model_arch.lower() == 'simple':
+            print('Model: ', 'SimpleBackEnd')
+            model_back_end = SimpleBackEnd()
         elif model_arch.lower() == 'cornets':
             print('Model: ', 'VOneCORnet-S')
             model_back_end = CORnetSBackEnd()

@@ -5,6 +5,40 @@ from torch import nn
 from collections import OrderedDict
 
 
+
+
+class SimpleBackEnd(nn.Module):
+    def __init__(self, num_classes=200):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(64, 10, kernel_size=5, stride=2, padding=2),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(10, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+        )
+        self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
+        self.classifier = nn.Sequential(
+            nn.Dropout(),
+            nn.Linear(256 * 7 * 7, 4096),
+            nn.ReLU(inplace=True),
+            # nn.Dropout(),
+            # nn.Linear(4096, 4096),
+            # nn.ReLU(inplace=True),
+            nn.Linear(4096, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
+        return x
+
+
+
+
 # AlexNet Back-End architecture
 # Based on Torchvision implementation in
 # https://github.com/pytorch/vision/blob/master/torchvision/models/alexnet.py

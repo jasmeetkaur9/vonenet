@@ -43,7 +43,7 @@ def generate_gabor_param(features, seed=0, rand_flag=False, sf_corr=0, sf_max=9,
     else:
         print('Neuronal distributions gabor parameters')
         # DeValois 1982a
-        ori_bins1 = np.array([-22.5, 22.5])
+        ori_bins1 = np.array([-22.5,22.5])
         ori_dist1 = np.array([50])
         ori_dist1 = ori_dist1 / ori_dist1.sum()
 
