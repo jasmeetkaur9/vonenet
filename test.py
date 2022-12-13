@@ -22,12 +22,12 @@ def accuracy(output, target, topk=(1,)):
 
 model = vonenet.get_model(model_arch='simple', pretrained=False, noise_mode=None).module
 
-checkpoint = torch.load('/home/jasmeet/vonenet/trained_model.pth.tar')
+checkpoint = torch.load('/home/jasmeet/vonenet/epoch_02_v.pth.tar')
 model.load_state_dict(checkpoint['state_dict'])
 print(f'model {checkpoint} loaded')
 # img_path='/home/jasmeet/Downloads/tiny-imagenet-200-2/val/images/val_1008.JPEG'
 # img = skimage.io.imread(img_path)/255.0
-data_path = '/home/jasmeet/Downloads/tiny-2/val/'
+data_path = '/home/jasmeet/vonenet/val_gaussian'
 normalize = torchvision.transforms.Normalize(mean=[0.5, 0.5, 0.5],
                                              std=[0.5, 0.5, 0.5])
 dataset = torchvision.datasets.ImageFolder(data_path,
@@ -53,4 +53,4 @@ with torch.no_grad():
 
 print("Accuracy 1 :",accuracy1)
 print("Accuracy 5 :",accuracy5) 
-print("Loss :",l)      
+print("Loss :",l/10000)      
